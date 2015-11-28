@@ -12,17 +12,6 @@ load("~/Pap/RossMan/RM.RData")
 #Datos descriptivos de Ventas.
 summary(RossMan$Sales)
 
-#Histograma de Ventas
-png("Histograma de Ventas(1).png")
-qplot(RossMan$Sales,fill = ..count..) +
-  theme_minimal() +
-  xlab("Ventas") +
-  ylab("Volumen día cualquiera") +
-  theme(legend.position = "none") +
-  scale_fill_gradient("Count", low = "green", high = "red") +
-  xlim(0,23500)
-dev.off()
-
 #Volumen de ventas en un dia cualquiera
 png("Histograma de Ventas(2).png")
 ggplot(RossMan, aes(Sales,fill=..count..))+ 
@@ -199,6 +188,9 @@ boost.RossMan <- gbm(Sales~.,
                      interaction.depth = nmtryOpt,
                      shrinkage = shrinkageOpt,
                      verbose = F)
+
+
+#poopity poop
 
 info.gbm <- predict(boost.RossMan,RossMan.N.test,n.trees = treeOpt)
 RMSPE[4] <- sqrt(mean((info.gbm -RossMan.N.test$Sales)^2))
