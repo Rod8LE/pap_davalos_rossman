@@ -7,28 +7,28 @@ library(plyr)
 library(dplyr)
 library(tree)
 library(randomForest)
-load("~/Pap/RossMan/RM.RData")
+#load("~/Pap/RossMan/RM.RData")
 
 #Datos descriptivos de Ventas.
 summary(RossMan$Sales)
 
 #Histograma de Ventas
 png("Histograma de Ventas(1).png")
-qplot(RossMan$Sales,fill = ..count..) +
+qplot(RossMan$Sales, fill = ..count..) +
   theme_minimal() +
   xlab("Ventas") +
-  ylab("Volumen día cualquiera") +
+  ylab("Volumen d?a cualquiera") +
   theme(legend.position = "none") +
   scale_fill_gradient("Count", low = "green", high = "red") +
-  xlim(0,23500)
+  xlim(0, 23500)
 dev.off()
 
 #Volumen de ventas en un dia cualquiera
 png("Histograma de Ventas(2).png")
-ggplot(RossMan, aes(Sales,fill=..count..))+ 
+ggplot(RossMan, aes(Sales, fill=..count..))+ 
   geom_histogram(binwidth = 1) +
   xlab("Ventas") +
-  ylab("Volumen día cualquiera") +
+  ylab("Volumen d?a cualquiera") +
   scale_fill_gradient("Count", low = "green", high = "red") + 
   theme_minimal()+
   xlim(0,20000)
@@ -40,14 +40,14 @@ ggplot(RossMan, aes(Sales,fill=StoreType)) +
   geom_histogram(binwidth = 1) +
   theme_minimal() +
   xlab("Ventas") +
-  ylab("Volumen día cualquiera") +
+  ylab("Volumen d?a cualquiera") +
   theme_minimal()+
   xlim(0,20000)
 dev.off()
 
 
 #Analisis Descriptivo por Tipo de Tienda
-sapply(split(RossMan$Sales,RossMan$StoreType),summary)
+sapply(split(RossMan$Sales, RossMan$StoreType), summary)
 
 #Analisis Descriptivo por Tipo de Venta Boxplot
 png("Boxplot Tipo de Venta.png")
@@ -61,14 +61,14 @@ dev.off()
 #Analisis Descriptivo por Numero de Clientes
 summary(RossMan$Customers)
 
-png("Nivel de Ventas por Años.png")
+png("Nivel de Ventas por A?os.png")
 qplot(as.Date(Date), Customers, data=RossMan, geom=c("smooth"))+
   xlab("Fecha") + ylab("Ventas")
 dev.off()
 
 #Analisis Descriptivo por Numero de Clientes
 png("Boxplot por Tipo de Tienda.png")
-ggplot(data = RossMan,aes(x = StoreType,y = Sales,
+ggplot(data = RossMan, aes(x = StoreType,y = Sales,
                           fill = month(RossMan$Date, label = TRUE))) +
   geom_boxplot() +
   theme_minimal() +
@@ -78,8 +78,8 @@ ggplot(data = RossMan,aes(x = StoreType,y = Sales,
 dev.off()
 
 #Mes por Compras promediales
-RossMan$Mes<-month(RossMan$Date, label = TRUE)
-ventas.Mth <- ddply(.data = RossMan, .variables = c("Mes"),summarise, 
+RossMan$Mes <- month(RossMan$Date, label = TRUE)
+ventas.Mth  <- ddply(.data = RossMan, .variables = c("Mes"), summarise, 
                     Mean = mean(Sales))
 names(ventas.Mth) <- c("Month","Mean")
 
@@ -90,7 +90,7 @@ dev.off()
 
 
 #Competition Distance
-Comp.Ventas<- ddply(.data = RossMan,
+Comp.Ventas <- ddply(.data = RossMan,
                     .variables = c("CompetitionDistance"),
                     summarise,
                     Average = mean(Sales))
@@ -107,24 +107,24 @@ dev.off()
 load("~/Pap/Rossman/RM.RData")
 set.seed(1)
 RMSPE<- c(1:4)
-names(RMSPE) <-c("lm","tree","random forest","boosting tree")
-RossMan <- select(RossMan,DayOfWeek,Sales,Promo,Promo2,StateHoliday,SchoolHoliday,
-                  Assortment,CompetitionDistance,Mes,StoreType)
+names(RMSPE) <- c("lm", "tree", "random forest", "boosting tree")
+RossMan <- select(RossMan, DayOfWeek, Sales, Promo, Promo2, StateHoliday, SchoolHoliday,
+                  Assortment, CompetitionDistance, Mes, StoreType)
 RossMan <- na.omit(RossMan)
 #RossMan$ddSales <- scale(RossMan$Sales)
 
 #Conjuntos de entrenaiento
-#######Selecci´on del mejor modelo############
+#######Selecci?on del mejor modelo############
 #lm
-train <- sample(1:nrow(RossMan),nrow(RossMan)*0.8)
-RossMan.train <- RossMan[train,]
-RossMan.test <- RossMan[-train,]
+train <- sample(1:nrow(RossMan), nrow(RossMan)*0.8)
+RossMan.train <- RossMan[train, ]
+RossMan.test <- RossMan[-train, ]
 lm.RossMan <- lm(Sales~.,RossMan.train)
 lm.pred <- predict(lm.RossMan,RossMan.test)
 RMSPE[1] <- sqrt(mean((RossMan.test$Sales - lm.pred)^2))
 
 #Arbol 
-tree.RossMan <- tree(Sales~.,RossMan.train)
+tree.RossMan <- tree(Sales~., RossMan.train)
 Pred.tree <- predict(tree.RossMan,RossMan.test)
 RMSPE[2] <- sqrt(mean((RossMan.test$Sales - Pred.tree)^2))
 
@@ -145,11 +145,11 @@ for(j in 1:length(nmtry)){
     Percentage.Error[j,i]<-
       sqrt(mean((info.random - RossMan.N.test$Sales)^2))
     Percentage.Error
-    print(i)
+    print(ntrees[i])
   }
-  print(j)
+  print(nmtry[j])
 }
-which(Percentage.Error == min(Percentage.Error),arr.ind = TRUE)
+which(Percentage.Error == min(Percentage.Error), arr.ind = TRUE)
 RMSPE[3] <- min(na.omit(Percentage.Error))
 
 #Boosting
@@ -184,10 +184,10 @@ for(k in 1:length(nmtry)){
 mtryarr <- which(sapply(error.gbm.tree,min)==
                    min(sapply(error.gbm.tree,min)))
 nmtryOpt <- nmtry[mtryarr]
-#Encontramos los ´indices del mejor mtry
+#Encontramos los ?indices del mejor mtry
 optimal <- which(min(error.gbm.tree[[mtryarr]])== error.gbm.tree[[mtryarr]],arr.ind = TRUE)
 
-#Mejor cantidad de ´arboles
+#Mejor cantidad de ?arboles
 treeOpt <- ntrees[optimal[2]]
 #Mejor lambda
 shrinkageOpt <- shrinkage[optimal[1]]
