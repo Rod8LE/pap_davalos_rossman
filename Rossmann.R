@@ -260,7 +260,12 @@ paste(ntrees[optimal_dims[1]], 'trees',
       intdepth[optimal_dims[3]], 'int_depth', 
       bag_f[optimal_dims[4]], '% fraction of bagging')
 
+#many models are better than one
 
+#I was planning here on comparing, histograms of RossMan.N.test$Sales, each error_array columns AND 
+#error_vector, in order to prove that is always better to train more than 1 model with the same combination
+#of parameters, same sample to train and test, to have more than one prediction to the same data, get the
+#mean of this predictions AND have a better a result in prediction at large scale
 
 
 
