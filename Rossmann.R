@@ -218,7 +218,8 @@ intdepth <- c(1, 4)
 bag_f <- c(.5, .75, .9)
 cv_folds <- 5
 
-array_error_boosting <- array(data = NA, dim = c(2, 2, 2, 3))
+array_error_boosting <- array(data = NA, dim = c(2, 2, 2, 3), 
+                              dimnames = list(ntrees, shrinkage, intdepth, bag_f))
 
 for(bag in bag_f){
   for(int in intdepth){
@@ -240,26 +241,25 @@ for(bag in bag_f){
           error_array[, cv] = predict(tree_object, RossMan.N.test,
                                        n.trees = tre)
         }
-        error_vector = apply(error_array, )
+        error_vector = apply(error_array, MARGIN = 1, FUN = mean)
         
-        error_vector <- sqrt(mean((info.gbm - RossMan.N.test$Sales)^2)) #fix
-        array_error_boosting
+        array_error_boosting[paste(tre), paste(shr), paste(int), paste(bag)] <- 
+          sqrt(mean((error_vector - RossMan.N.test$Sales)^2))
+        
       }
     }
   }
 }
-#Encontrando las variables que dieron mejores resultados
-#mtry
-mtryarr <- which(sapply(error.gbm.tree,min)==
-                   min(sapply(error.gbm.tree,min)))
-nmtryOpt <- nmtry[mtryarr]
-#Encontramos los ?indices del mejor mtry
-optimal <- which(min(error.gbm.tree[[mtryarr]])== error.gbm.tree[[mtryarr]],arr.ind = TRUE)
+dimnames(array_error_boosting) = list(paste('tree', ntrees), paste('shrink', shrinkage), 
+                                      paste('depth', intdepth), paste('fraction', bag_f))
+#mejor combinacion
+optimal_dims <- which(min(array_error_boosting) == array_error_boosting, arr.ind = T)
 
-#Mejor cantidad de ?arboles
-treeOpt <- ntrees[optimal[2]]
-#Mejor lambda
-shrinkageOpt <- shrinkage[optimal[1]]
+paste(ntrees[optimal_dims[1]], 'trees',
+      shrinkage[optimal_dims[2]], '% shrinkage', 
+      intdepth[optimal_dims[3]], 'int_depth', 
+      bag_f[optimal_dims[4]], '% fraction of bagging')
+
 
 
 
