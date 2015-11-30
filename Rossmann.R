@@ -132,7 +132,7 @@ names(RMSPE)[2] = 'tree'
 
 #Random Forest
 #Se reduce el numero de la muestra
-N.train <- sample(1:nrow(RossMan), nrow(RossMan)*0.75)
+N.train <- sample(1:nrow(RossMan), nrow(RossMan)*0.02)
 RossMan.N.train <- RossMan[N.train,]
 RossMan.N.test <- RossMan[-N.train,]
 Percentage.Error <- data.frame()
@@ -218,13 +218,14 @@ intdepth <- c(1, 4)
 bag_f <- c(.5, .75, .9)
 cv_folds <- 5
 
-array_error_boosting <- array(data = NA, dim = (2, 2, 2, 3))
-error_vector <- array(data = NA, dim = c(dim(RossMan.N.test)[1], cv_folds))
+array_error_boosting <- array(data = NA, dim = c(2, 2, 2, 3))
 
 for(bag in bag_f){
   for(int in intdepth){
     for(shr in shrinkage){
       for(tre in ntrees){
+        
+        error_array <- array(data = NA, dim = c(dim(RossMan.N.test)[1], cv_folds))
         for(cv in 1:cv_folds){
           tree_object <- gbm(Sales~.,
                              data = RossMan.N.train,
@@ -234,12 +235,12 @@ for(bag in bag_f){
                              shrinkage = shr,
                              bag.fraction = bag,
                              n.minobsinnode = 15,
-                             verbose = F)
+                             verbose = T)
           
-          error_vector[, cv] = predict(tree_object, RossMan.N.test,
+          error_array[, cv] = predict(tree_object, RossMan.N.test,
                                        n.trees = tre)
         }
-        
+        error_vector = apply(error_array, )
         
         error_vector <- sqrt(mean((info.gbm - RossMan.N.test$Sales)^2)) #fix
         array_error_boosting
