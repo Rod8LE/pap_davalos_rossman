@@ -122,16 +122,17 @@ RossMan.test <- RossMan[-train, ]
 lm.RossMan <- lm(Sales~.,RossMan.train)
 lm.pred <- predict(lm.RossMan,RossMan.test)
 RMSPE[1] <- sqrt(mean((RossMan.test$Sales - lm.pred)^2))
+names(RMSPE)[1] = 'lm'
 
 #Arbol 
 tree.RossMan <- tree(Sales~., RossMan.train)
 Pred.tree <- predict(tree.RossMan,RossMan.test)
 RMSPE[2] <- sqrt(mean((RossMan.test$Sales - Pred.tree)^2))
-
+names(RMSPE)[2] = 'tree'
 
 #Random Forest
 #Se reduce el numero de la muestra
-N.train <- sample(1:nrow(RossMan),nrow(RossMan)*0.005)
+N.train <- sample(1:nrow(RossMan), nrow(RossMan)*0.75)
 RossMan.N.train <- RossMan[N.train,]
 RossMan.N.test <- RossMan[-N.train,]
 Percentage.Error <- data.frame()
@@ -151,13 +152,14 @@ for(j in 1:length(nmtry)){
 }
 which(Percentage.Error == min(Percentage.Error), arr.ind = TRUE)
 RMSPE[3] <- min(na.omit(Percentage.Error))
+names(RMSPE)[3] = 'randomForest'
 
 #Boosting
 library(gbm)
 ntrees <- c(1000,2000,3000)
 shrinkage <- c(0.01,0.05,0.1)
 nmtry <- c(2,3,4)
-error.gbm.tree <- list()
+error.gbm.tree <- list() #uneeded list, can be used a 3x3x3 matrix
 error.gbm <- data.frame()
 for(k in 1:length(nmtry)){
   for (j in 1:length(shrinkage)){
@@ -202,6 +204,66 @@ boost.RossMan <- gbm(Sales~.,
 
 info.gbm <- predict(boost.RossMan,RossMan.N.test,n.trees = treeOpt)
 RMSPE[4] <- sqrt(mean((info.gbm -RossMan.N.test$Sales)^2))
+names(RMSPE)[4] = 'boostedTrees'
 
 #Mejor modelo
-min(RMSPE[4])
+min(RMSPE) #boosting!!!
+
+#######################################
+###### booted trees devastation! ######
+library(gbm)
+ntrees <- c(1000, 10000)
+shrinkage <- c(0.01, 0.1)
+intdepth <- c(1, 4)
+bag_f <- c(.5, .75, .9)
+cv_folds <- 5
+
+array_error_boosting <- array(data = NA, dim = (2, 2, 2, 3))
+error_vector <- array(data = NA, dim = c(dim(RossMan.N.test)[1], cv_folds))
+
+for(bag in bag_f){
+  for(int in intdepth){
+    for(shr in shrinkage){
+      for(tre in ntrees){
+        for(cv in 1:cv_folds){
+          tree_object <- gbm(Sales~.,
+                             data = RossMan.N.train,
+                             distribution = "gaussian",
+                             n.trees = tre,
+                             interaction.depth = int,
+                             shrinkage = shr,
+                             bag.fraction = bag,
+                             n.minobsinnode = 15,
+                             verbose = F)
+          
+          error_vector[, cv] = predict(tree_object, RossMan.N.test,
+                                       n.trees = tre)
+        }
+        
+        
+        error_vector <- sqrt(mean((info.gbm - RossMan.N.test$Sales)^2)) #fix
+        array_error_boosting
+      }
+    }
+  }
+}
+#Encontrando las variables que dieron mejores resultados
+#mtry
+mtryarr <- which(sapply(error.gbm.tree,min)==
+                   min(sapply(error.gbm.tree,min)))
+nmtryOpt <- nmtry[mtryarr]
+#Encontramos los ?indices del mejor mtry
+optimal <- which(min(error.gbm.tree[[mtryarr]])== error.gbm.tree[[mtryarr]],arr.ind = TRUE)
+
+#Mejor cantidad de ?arboles
+treeOpt <- ntrees[optimal[2]]
+#Mejor lambda
+shrinkageOpt <- shrinkage[optimal[1]]
+
+
+
+
+
+
+
+
