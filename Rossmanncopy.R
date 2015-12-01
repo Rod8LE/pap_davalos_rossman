@@ -8,7 +8,7 @@ library(dplyr)
 library(tree)
 library(randomForest)
 load("~/Pap/RossMan/RM.RData")
-
+#prueba
 #Datos descriptivos de Ventas.
 summary(RossMan$Sales)
 
@@ -17,7 +17,7 @@ png("Histograma de Ventas(2).png")
 ggplot(RossMan, aes(Sales,fill=..count..))+ 
   geom_histogram(binwidth = 1) +
   xlab("Ventas") +
-  ylab("Volumen día cualquiera") +
+  ylab("Volumen dÃ­a cualquiera") +
   scale_fill_gradient("Count", low = "green", high = "red") + 
   theme_minimal()+
   xlim(0,20000)
@@ -29,7 +29,7 @@ ggplot(RossMan, aes(Sales,fill=StoreType)) +
   geom_histogram(binwidth = 1) +
   theme_minimal() +
   xlab("Ventas") +
-  ylab("Volumen día cualquiera") +
+  ylab("Volumen dÃ­a cualquiera") +
   theme_minimal()+
   xlim(0,20000)
 dev.off()
@@ -50,7 +50,7 @@ dev.off()
 #Analisis Descriptivo por Numero de Clientes
 summary(RossMan$Customers)
 
-png("Nivel de Ventas por Años.png")
+png("Nivel de Ventas por AÃ±os.png")
 qplot(as.Date(Date), Customers, data=RossMan, geom=c("smooth"))+
   xlab("Fecha") + ylab("Ventas")
 dev.off()
@@ -103,7 +103,7 @@ RossMan <- na.omit(RossMan)
 #RossMan$ddSales <- scale(RossMan$Sales)
 
 #Conjuntos de entrenaiento
-#######Selecci´on del mejor modelo############
+#######SelecciÂ´on del mejor modelo############
 #lm
 train <- sample(1:nrow(RossMan),nrow(RossMan)*0.8)
 RossMan.train <- RossMan[train,]
@@ -173,10 +173,10 @@ for(k in 1:length(nmtry)){
 mtryarr <- which(sapply(error.gbm.tree,min)==
                    min(sapply(error.gbm.tree,min)))
 nmtryOpt <- nmtry[mtryarr]
-#Encontramos los ´indices del mejor mtry
+#Encontramos los Â´indices del mejor mtry
 optimal <- which(min(error.gbm.tree[[mtryarr]])== error.gbm.tree[[mtryarr]],arr.ind = TRUE)
 
-#Mejor cantidad de ´arboles
+#Mejor cantidad de Â´arboles
 treeOpt <- ntrees[optimal[2]]
 #Mejor lambda
 shrinkageOpt <- shrinkage[optimal[1]]
